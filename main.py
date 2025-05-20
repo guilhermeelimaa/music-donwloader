@@ -8,12 +8,15 @@ class YouTubeAudioDownloader:
     def __init__(self, root):
         self.root = root
         self.root.title("Music Downloader")
-        self.root.geometry("600x300")
+        self.root.geometry("600x350")  # Aumentei a altura para o rodapé
         self.root.resizable(False, False)
+        
+        # Configuração de estilo
+        self.setup_styles()
         
         # Variáveis
         self.url_var = tk.StringVar()
-        self.destino_var = tk.StringVar(value="")
+        self.destino_var = tk.StringVar(value=os.path.expanduser("~/Downloads"))
         self.progress_var = tk.DoubleVar(value=0)
         self.status_var = tk.StringVar(value="Pronto para baixar")
         
@@ -24,20 +27,47 @@ class YouTubeAudioDownloader:
         self.yt = None
         self.audio_stream = None
     
+    def setup_styles(self):
+        """Configura os estilos visuais da aplicação"""
+        style = ttk.Style()
+        style.theme_use('clam')
+        
+        # Configurações gerais
+        style.configure('.', background='#f0f0f0', foreground='#333')
+        style.configure('TFrame', background='#f0f0f0')
+        style.configure('TLabel', background='#f0f0f0', font=('Helvetica', 10))
+        style.configure('TButton', font=('Helvetica', 10), padding=5)
+        style.configure('TEntry', padding=5)
+        
+        # Barra de progresso
+        style.configure("Horizontal.TProgressbar", 
+                       thickness=20, 
+                       troughcolor='#e0e0e0',
+                       background='#4CAF50')
+    
     def create_widgets(self):
         # Frame principal
         main_frame = ttk.Frame(self.root, padding="15")
         main_frame.pack(fill=tk.BOTH, expand=True)
         
+        # Título
+        title_frame = ttk.Frame(main_frame)
+        title_frame.grid(row=0, column=0, columnspan=2, pady=(0, 15))
+        
+        ttk.Label(title_frame, 
+                 text="YouTube para MP3", 
+                 font=('Helvetica', 16, 'bold'),
+                 foreground='#333').pack()
+        
         # URL do vídeo
-        ttk.Label(main_frame, text="URL do vídeo:").grid(row=0, column=0, sticky=tk.W, pady=5)
+        ttk.Label(main_frame, text="URL do vídeo:").grid(row=1, column=0, sticky=tk.W, pady=5)
         url_entry = ttk.Entry(main_frame, textvariable=self.url_var, width=45)
-        url_entry.grid(row=0, column=1, sticky=tk.EW, pady=5)
+        url_entry.grid(row=1, column=1, sticky=tk.EW, pady=5)
         
         # Pasta de destino
-        ttk.Label(main_frame, text="Pasta de destino:").grid(row=1, column=0, sticky=tk.W, pady=5)
+        ttk.Label(main_frame, text="Pasta de destino:").grid(row=2, column=0, sticky=tk.W, pady=5)
         destino_frame = ttk.Frame(main_frame)
-        destino_frame.grid(row=1, column=1, sticky=tk.EW, pady=5)
+        destino_frame.grid(row=2, column=1, sticky=tk.EW, pady=5)
         
         destino_entry = ttk.Entry(destino_frame, textvariable=self.destino_var, width=35)
         destino_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
@@ -46,20 +76,43 @@ class YouTubeAudioDownloader:
         browse_btn.pack(side=tk.RIGHT, padx=(5, 0))
         
         # Barra de progresso
-        ttk.Label(main_frame, text="Progresso:").grid(row=2, column=0, sticky=tk.W, pady=5)
-        self.progress_bar = ttk.Progressbar(main_frame, variable=self.progress_var, maximum=100)
-        self.progress_bar.grid(row=2, column=1, sticky=tk.EW, pady=5)
+        ttk.Label(main_frame, text="Progresso:").grid(row=3, column=0, sticky=tk.W, pady=5)
+        self.progress_bar = ttk.Progressbar(main_frame, variable=self.progress_var, maximum=100,
+                                          style="Horizontal.TProgressbar")
+        self.progress_bar.grid(row=3, column=1, sticky=tk.EW, pady=5)
         
-        # Status
-        self.status_label = ttk.Label(main_frame, textvariable=self.status_var)
-        self.status_label.grid(row=3, column=1, sticky=tk.W, pady=5)
+        # Status (centralizado)
+        status_frame = ttk.Frame(main_frame)
+        status_frame.grid(row=4, column=0, columnspan=2, pady=10)
+        
+        self.status_label = ttk.Label(status_frame, 
+                                    textvariable=self.status_var,
+                                    font=('Helvetica', 10, 'italic'),
+                                    foreground='#555')
+        self.status_label.pack()
         
         # Botão de download (centralizado)
         btn_frame = ttk.Frame(main_frame)
-        btn_frame.grid(row=4, column=0, columnspan=2, pady=10)
+        btn_frame.grid(row=5, column=0, columnspan=2, pady=10)
         
-        download_btn = ttk.Button(btn_frame, text="Baixar Áudio (MP3)", command=self.iniciar_download)
-        download_btn.pack()
+        download_btn = ttk.Button(btn_frame, 
+                                 text="BAIXAR ÁUDIO (MP3)", 
+                                 command=self.iniciar_download,
+                                 style='Accent.TButton')
+        download_btn.pack(ipadx=20, ipady=5)
+        
+        # Rodapé
+        footer_frame = ttk.Frame(main_frame)
+        footer_frame.grid(row=6, column=0, columnspan=2, pady=(15, 0))
+        
+        ttk.Label(footer_frame, 
+                 text="Desenvolvido por Guilherme Lima", 
+                 font=('Helvetica', 8),
+                 foreground='#888').pack()
+        
+        # Linha decorativa
+        separator = ttk.Separator(main_frame, orient='horizontal')
+        separator.grid(row=7, column=0, columnspan=2, sticky='ew', pady=(10, 0))
         
         # Configurar expansão
         main_frame.columnconfigure(1, weight=1)
